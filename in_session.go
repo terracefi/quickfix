@@ -354,6 +354,10 @@ func (state inSession) processReject(session *session, msg *Message, rej Message
 }
 
 func (state inSession) doTargetTooLow(session *session, msg *Message, rej targetTooLow) (nextState sessionState) {
+	if msg.IsMsgTypeOf("W") {
+		return state
+	}
+
 	var posDupFlag FIXBoolean
 	if msg.Header.Has(tagPossDupFlag) {
 		if err := msg.Header.GetField(tagPossDupFlag, &posDupFlag); err != nil {

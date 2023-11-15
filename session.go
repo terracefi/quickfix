@@ -568,10 +568,6 @@ func (s *session) fromCallback(msg *Message) MessageRejectError {
 }
 
 func (s *session) checkTargetTooLow(msg *Message) MessageRejectError {
-	if msg.IsMsgTypeOf("W") {
-		return nil
-	}
-
 	if !msg.Header.Has(tagMsgSeqNum) {
 		return RequiredTagMissing(tagMsgSeqNum)
 	}
