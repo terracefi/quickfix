@@ -17,6 +17,7 @@ package quickfix
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"time"
 
@@ -400,10 +401,11 @@ func (state inSession) doTargetTooLow(session *session, msg *Message, rej target
 			return handleStateError(session, err)
 		}
 
-		if err := session.initiateLogout(""); err != nil {
-			return handleStateError(session, err)
-		}
-		return logoutState{}
+		handleStateError(session, fmt.Errorf("%s", msg.ToMessage().String()))
+		// if err := session.initiateLogout(""); err != nil {
+		// 	return handleStateError(session, err)
+		// }
+		// return logoutState{}
 	}
 
 	return state
