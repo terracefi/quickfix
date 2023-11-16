@@ -628,22 +628,22 @@ func (s *session) checkCompID(msg *Message) MessageRejectError {
 }
 
 func (s *session) checkSendingTime(msg *Message) MessageRejectError {
-	if s.SkipCheckLatency {
-		return nil
-	}
+	// if s.SkipCheckLatency {
+	// 	return nil
+	// }
 
-	if ok := msg.Header.Has(tagSendingTime); !ok {
-		return RequiredTagMissing(tagSendingTime)
-	}
+	// if ok := msg.Header.Has(tagSendingTime); !ok {
+	// 	return RequiredTagMissing(tagSendingTime)
+	// }
 
-	sendingTime, err := msg.Header.GetTime(tagSendingTime)
-	if err != nil {
-		return err
-	}
+	// sendingTime, err := msg.Header.GetTime(tagSendingTime)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if delta := time.Since(sendingTime); delta <= -1*s.MaxLatency || delta >= s.MaxLatency {
-		return sendingTimeAccuracyProblem()
-	}
+	// if delta := time.Since(sendingTime); delta <= -1*s.MaxLatency || delta >= s.MaxLatency {
+	// 	return sendingTimeAccuracyProblem()
+	// }
 
 	return nil
 }

@@ -17,7 +17,6 @@ package quickfix
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"time"
 
@@ -396,17 +395,16 @@ func (state inSession) doTargetTooLow(session *session, msg *Message, rej target
 		return state.processReject(session, msg, err)
 	}
 
-	if sendingTime.Before(origSendingTime.Time) {
-		if err := session.doReject(msg, sendingTimeAccuracyProblem()); err != nil {
-			return handleStateError(session, err)
-		}
+	// if sendingTime.Before(origSendingTime.Time) {
+	// if err := session.doReject(msg, sendingTimeAccuracyProblem()); err != nil {
+	// 	return handleStateError(session, err)
+	// }
 
-		handleStateError(session, fmt.Errorf("%s", msg.ToMessage().String()))
-		// if err := session.initiateLogout(""); err != nil {
-		// 	return handleStateError(session, err)
-		// }
-		// return logoutState{}
-	}
+	// if err := session.initiateLogout(""); err != nil {
+	// 	return handleStateError(session, err)
+	// }
+	// return logoutState{}
+	// }
 
 	return state
 }
