@@ -568,41 +568,41 @@ func (s *session) fromCallback(msg *Message) MessageRejectError {
 }
 
 func (s *session) checkTargetTooLow(msg *Message) MessageRejectError {
-	if msg.IsMsgTypeOf("W") {
-		return nil
-	}
-	if !msg.Header.Has(tagMsgSeqNum) {
-		return RequiredTagMissing(tagMsgSeqNum)
-	}
+	// if msg.IsMsgTypeOf("W") {
+	// 	return nil
+	// }
+	// if !msg.Header.Has(tagMsgSeqNum) {
+	// 	return RequiredTagMissing(tagMsgSeqNum)
+	// }
 
-	seqNum, err := msg.Header.GetInt(tagMsgSeqNum)
-	if err != nil {
-		return err
-	}
+	// seqNum, err := msg.Header.GetInt(tagMsgSeqNum)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if seqNum < s.store.NextTargetMsgSeqNum() {
-		return targetTooLow{ReceivedTarget: seqNum, ExpectedTarget: s.store.NextTargetMsgSeqNum()}
-	}
+	// if seqNum < s.store.NextTargetMsgSeqNum() {
+	// 	return targetTooLow{ReceivedTarget: seqNum, ExpectedTarget: s.store.NextTargetMsgSeqNum()}
+	// }
 
 	return nil
 }
 
 func (s *session) checkTargetTooHigh(msg *Message) MessageRejectError {
-	if msg.IsMsgTypeOf("W") {
-		return nil
-	}
-	if !msg.Header.Has(tagMsgSeqNum) {
-		return RequiredTagMissing(tagMsgSeqNum)
-	}
+	// if msg.IsMsgTypeOf("W") {
+	// 	return nil
+	// }
+	// if !msg.Header.Has(tagMsgSeqNum) {
+	// 	return RequiredTagMissing(tagMsgSeqNum)
+	// }
 
-	seqNum, err := msg.Header.GetInt(tagMsgSeqNum)
-	if err != nil {
-		return err
-	}
+	// seqNum, err := msg.Header.GetInt(tagMsgSeqNum)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if seqNum > s.store.NextTargetMsgSeqNum() {
-		return targetTooHigh{ReceivedTarget: seqNum, ExpectedTarget: s.store.NextTargetMsgSeqNum()}
-	}
+	// if seqNum > s.store.NextTargetMsgSeqNum() {
+	// 	return targetTooHigh{ReceivedTarget: seqNum, ExpectedTarget: s.store.NextTargetMsgSeqNum()}
+	// }
 
 	return nil
 }

@@ -17,7 +17,6 @@ package quickfix
 
 import (
 	"bytes"
-	"strings"
 	"time"
 
 	"github.com/terracefi/quickfix/toolkit"
@@ -167,9 +166,9 @@ func (state inSession) handleSequenceReset(session *session, msg *Message) (next
 	// NOTE: Manually stops check for CrossX
 	// 123=true is set for the sequence reset messages from CrossX but their new sequence tend to be too low
 	// TargetCompID: CROSSXUAT / CROSSXLD
-	if strings.HasPrefix(session.sessionID.TargetCompID, "CROSSX") {
-		checkTooHigh, checkTooLow = false, false
-	}
+	// if strings.HasPrefix(session.sessionID.TargetCompID, "CROSSX") {
+	// 	checkTooHigh, checkTooLow = false, false
+	// }
 
 	if err := session.verifySelect(msg, checkTooHigh, checkTooLow); err != nil {
 		session.log.OnEvent("SequenceReset rejected on validation")
