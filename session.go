@@ -372,7 +372,7 @@ func (s *session) sendBytes(msg []byte) {
 	s.disconnectMutex.Lock()
 	defer s.disconnectMutex.Unlock()
 	if s.messageOut == nil {
-		s.log.OnEventf("Failed to send: disconnected")
+		s.log.OnEventf("Failed to send: disconnected %s", s.sessionID.String())
 		return
 	}
 
@@ -382,7 +382,7 @@ func (s *session) sendBytes(msg []byte) {
 }
 
 func (s *session) doTargetTooHigh(reject targetTooHigh) (nextState resendState, err error) {
-	s.log.OnEventf("MsgSeqNum too high, expecting %v but received %v", reject.ExpectedTarget, reject.ReceivedTarget)
+	s.log.OnEventf("MsgSeqNum too high, expecting %v but received %v on %s", reject.ExpectedTarget, reject.ReceivedTarget, s.sessionID.String())
 	return s.sendResendRequest(reject.ExpectedTarget, reject.ReceivedTarget-1)
 }
 
@@ -433,9 +433,9 @@ func (s *session) handleLogon(msg *Message) error {
 
 	resetStore := false
 	if s.InitiateLogon {
-		s.log.OnEvent("Received logon response")
+		s.log.OnEventf("Received logon response: %s", s.sessionID.String())
 	} else {
-		s.log.OnEvent("Received logon request")
+		s.log.OnEventf("Received logon request: %s", s.sessionID.String())
 		resetStore = s.ResetOnLogon
 
 		if s.RefreshOnLogon {
@@ -499,7 +499,7 @@ func (s *session) initiateLogoutInReplyTo(reason string, inReplyTo *Message) (er
 		s.logError(err)
 		return
 	}
-	s.log.OnEvent("Inititated logout request")
+	s.log.OnEvent("Initiated logout request")
 	time.AfterFunc(s.LogoutTimeout, func() { s.sessionEvent <- toolkit.LogoutTimeout })
 	return
 }
@@ -714,7 +714,7 @@ type fixIn struct {
 }
 
 func (s *session) onDisconnect() {
-	s.log.OnEvent("Disconnected")
+	s.log.OnEvent(fmt.Sprintf("Disconnected %s", s.sessionID.String()))
 	s.disconnectMutex.Lock()
 	defer s.disconnectMutex.Unlock()
 	if s.ResetOnDisconnect {

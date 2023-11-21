@@ -159,11 +159,11 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		var msgOut chan []byte
 
 		address := session.SocketConnectAddress[connectionAttempt%len(session.SocketConnectAddress)]
-		session.log.OnEventf("Connecting to: %v", address)
+		session.log.OnEventf("Connecting to %s: (%v)", address, session.sessionID.String())
 
 		netConn, err := dialer.Dial("tcp", address)
 		if err != nil {
-			session.log.OnEventf("Failed to connect: %v", err)
+			session.log.OnEventf("Failed to connect to %s: %v", session.sessionID.String(), err)
 			goto reconnect
 		} else if tlsConfig != nil {
 			// Unless InsecureSkipVerify is true, server name config is required for TLS
@@ -177,7 +177,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 			}
 			tlsConn := tls.Client(netConn, tlsConfig)
 			if err = tlsConn.Handshake(); err != nil {
-				session.log.OnEventf("Failed handshake: %v", err)
+				session.log.OnEventf("Failed handshake on session %s: %v", session.sessionID.String(), err)
 				goto reconnect
 			}
 			netConn = tlsConn
@@ -186,7 +186,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		msgIn = make(chan fixIn)
 		msgOut = make(chan []byte)
 		if err := session.connect(msgIn, msgOut); err != nil {
-			session.log.OnEventf("Failed to initiate: %v", err)
+			session.log.OnEventf("Failed to initiate on session %s: %v", session.sessionID.String(), err)
 			goto reconnect
 		}
 
@@ -195,7 +195,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		go func() {
 			writeLoop(netConn, msgOut, session.log)
 			if err := netConn.Close(); err != nil {
-				session.log.OnEvent(err.Error())
+				session.log.OnEventf("%s: %v", session.sessionID.String(), err.Error())
 			}
 			close(disconnected)
 		}()
@@ -208,7 +208,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 
 	reconnect:
 		connectionAttempt++
-		session.log.OnEventf("Reconnecting in %v", session.ReconnectInterval)
+		session.log.OnEventf("Reconnecting %s in %v", session.sessionID.String(), session.ReconnectInterval)
 		if !i.waitForReconnectInterval(session.ReconnectInterval) {
 			return
 		}
