@@ -159,7 +159,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		var msgOut chan []byte
 
 		address := session.SocketConnectAddress[connectionAttempt%len(session.SocketConnectAddress)]
-		session.log.OnEventf("Connecting to %s: (%v)", address, session.sessionID.String())
+		session.log.OnEventf("Connecting to %s: (%v)", session.sessionID.String(), address)
 
 		netConn, err := dialer.Dial("tcp", address)
 		if err != nil {
