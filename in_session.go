@@ -164,10 +164,10 @@ func (state inSession) handleSequenceReset(session *session, msg *Message) (next
 	}
 
 	checkTooHigh, checkTooLow := bool(gapFillFlag), bool(gapFillFlag)
-	// NOTE: Manually stops check for CrossX
-	// 123=true is set for the sequence reset messages from CrossX but their new sequence tend to be too low
-	// TargetCompID: CROSSXUAT / CROSSXLD
-	if strings.HasPrefix(session.sessionID.TargetCompID, "CROSSX") {
+	// NOTE: Manually stops check for CrossX / Enigma
+	// 123=true is set for the sequence reset messages but new sequence tend to be too low
+	sessionTargetCompID := session.sessionID.TargetCompID
+	if strings.HasPrefix(sessionTargetCompID, "CROSSX") || strings.HasPrefix(sessionTargetCompID, "EXTP_PROD") {
 		checkTooHigh, checkTooLow = false, false
 	}
 
