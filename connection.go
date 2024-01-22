@@ -42,6 +42,11 @@ func readLoop(parser *parser, msgIn chan fixIn) {
 			fmt.Printf("Error reading message: %s\n", err.Error())
 			return
 		}
-		msgIn <- fixIn{msg, parser.lastRead}
+		
+		select {
+			case msgIn <- fixIn{msg, parser.lastRead}:
+			default:
+				fmt.Printf("msgIn full\n")
+		}
 	}
 }
