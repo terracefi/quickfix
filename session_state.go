@@ -73,6 +73,7 @@ func (sm *stateMachine) Stopped() bool {
 
 func (sm *stateMachine) Disconnected(session *session) {
 	if sm.IsConnected() {
+		session.log.OnEvent(fmt.Sprintf("%v-session-disconnected", session.sessionID))
 		sm.setState(session, latentState{})
 	}
 }
@@ -138,6 +139,7 @@ func (sm *stateMachine) CheckSessionTime(session *session, now time.Time) {
 	if !sm.IsSessionTime() {
 		session.log.OnEvent("In session")
 		sm.notifyInSessionTime()
+		session.log.OnEvent(fmt.Sprintf("%v-session-time-incorrect", session.sessionID))
 		sm.setState(session, latentState{})
 	}
 
@@ -147,6 +149,7 @@ func (sm *stateMachine) CheckSessionTime(session *session, now time.Time) {
 		if err := session.dropAndReset(); err != nil {
 			session.logError(err)
 		}
+		session.log.OnEvent(fmt.Sprintf("%v-session-reset", session.sessionID))
 		sm.setState(session, latentState{})
 	}
 }

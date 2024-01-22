@@ -15,7 +15,10 @@
 
 package quickfix
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 func writeLoop(connection io.Writer, messageOut chan []byte, log Log) {
 	for {
@@ -36,6 +39,7 @@ func readLoop(parser *parser, msgIn chan fixIn) {
 	for {
 		msg, err := parser.ReadMessage()
 		if err != nil {
+			fmt.Printf("Error reading message: %s\n", err.Error())
 			return
 		}
 		msgIn <- fixIn{msg, parser.lastRead}

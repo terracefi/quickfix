@@ -106,6 +106,7 @@ type waitForInSessionReq struct{ rep chan<- waitChan }
 
 func (s *session) waitForInSessionTime() {
 	rep := make(chan waitChan)
+	s.log.OnEvent(fmt.Sprintf("%v-session-wait-for-in-session-time", s.sessionID))
 	s.admin <- waitForInSessionReq{rep}
 	if wait, ok := <-rep; ok {
 		<-wait
@@ -745,6 +746,7 @@ func (s *session) onAdmin(msg interface{}) {
 		}
 
 		if !s.IsSessionTime() {
+			s.log.OnEvent(fmt.Sprintf("%v-onadmin-session-time-false", s.sessionID))
 			s.handleDisconnectState(s)
 			if msg.err != nil {
 				msg.err <- errors.New("Connection outside of session time")
@@ -820,6 +822,7 @@ func (s *session) run() {
 
 		case fixIn, ok := <-s.messageIn:
 			if !ok {
+				s.log.OnEvent(fmt.Sprintf("%v-message-in-closed", s.sessionID))
 				s.Disconnected(s)
 			} else {
 				s.Incoming(s, fixIn)

@@ -18,6 +18,7 @@ package quickfix
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 )
@@ -60,7 +61,11 @@ func (p *parser) readMore() (int, error) {
 		p.buffer = newBuffer
 	}
 
-	n, e := p.reader.Read(p.buffer[len(p.buffer):cap(p.buffer)])
+	pLen, pCap := len(p.buffer), cap(p.buffer)
+	n, e := p.reader.Read(p.buffer[pLen:pCap])
+	if e != nil {
+		e = fmt.Errorf("io-reader.Read error reading (%d/%d): %w", pLen, pCap, e)
+	}
 	p.lastRead = time.Now()
 	p.buffer = p.buffer[:len(p.buffer)+n]
 	return n, e
@@ -74,7 +79,7 @@ func (p *parser) findIndexAfterOffset(offset int, delim []byte) (int, error) {
 	for {
 		if offset > len(p.buffer) {
 			if n, err := p.readMore(); n == 0 && err != nil {
-				return -1, err
+				return -1, fmt.Errorf("error reading more 1: %w", err)
 			}
 
 			continue
@@ -87,7 +92,7 @@ func (p *parser) findIndexAfterOffset(offset int, delim []byte) (int, error) {
 		n, err := p.readMore()
 
 		if n == 0 && err != nil {
-			return -1, err
+			return -1, fmt.Errorf("error reading more 2: %w", err)
 		}
 	}
 }
@@ -142,17 +147,20 @@ func (p *parser) jumpLength() (int, error) {
 func (p *parser) ReadMessage() (msgBytes *bytes.Buffer, err error) {
 	start, err := p.findStart()
 	if err != nil {
+		err = fmt.Errorf("error reading message start: %w", err)
 		return
 	}
 	p.buffer = p.buffer[start:]
 
 	index, err := p.jumpLength()
 	if err != nil {
+		err = fmt.Errorf("error reading message length: %w", err)
 		return
 	}
 
 	index, err = p.findEndAfterOffset(index)
 	if err != nil {
+		err = fmt.Errorf("error reading message end: %w", err)
 		return
 	}
 
