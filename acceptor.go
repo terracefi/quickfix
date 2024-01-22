@@ -229,7 +229,7 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 		}
 	}()
 
-	reader := bufio.NewReader(netConn)
+	reader := bufio.NewReaderSize(netConn, 300*1024*1024)
 	parser := newParser(reader)
 
 	msgBytes, err := parser.ReadMessage()
