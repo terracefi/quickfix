@@ -339,7 +339,7 @@ func (a *Acceptor) handleConnection(netConn net.Conn) {
 	}
 
 	a.sessionAddr.Store(sessID, netConn.RemoteAddr())
-	msgIn := make(chan fixIn)
+	msgIn := make(chan fixIn, 1_000_000)
 	msgOut := make(chan []byte)
 
 	if err := session.connect(msgIn, msgOut); err != nil {
