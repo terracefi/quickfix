@@ -39,6 +39,7 @@ type Initiator struct {
 	sessions        map[SessionID]*session
 	localAddr *net.TCPAddr
 	sessionFactory
+	bufferSize int
 }
 
 // Start Initiator.
@@ -59,7 +60,7 @@ func (i *Initiator) Start() (err error) {
 
 		i.wg.Add(1)
 		go func(sessID SessionID) {
-			i.handleConnection(i.sessions[sessID], tlsConfig, dialer)
+			i.handleConnection(i.sessions[sessID], tlsConfig, dialer, i.bufferSize)
 			i.wg.Done()
 		}(sessionID)
 	}
@@ -79,7 +80,7 @@ func (i *Initiator) Stop() {
 }
 
 // NewInitiator creates and initializes a new Initiator.
-func NewInitiator(app Application, storeFactory MessageStoreFactory, appSettings *Settings, logFactory LogFactory, localAddr *net.TCPAddr) (*Initiator, error) {
+func NewInitiator(app Application, storeFactory MessageStoreFactory, appSettings *Settings, logFactory LogFactory, localAddr *net.TCPAddr, bufferSize *int) (*Initiator, error) {
 	i := &Initiator{
 		app:             app,
 		storeFactory:    storeFactory,
@@ -89,6 +90,12 @@ func NewInitiator(app Application, storeFactory MessageStoreFactory, appSettings
 		sessions:        make(map[SessionID]*session),
 		sessionFactory:  sessionFactory{true},
 		localAddr: 	 localAddr,
+	}
+
+	if bufferSize != nil {
+		i.bufferSize = *bufferSize
+	} else {
+		i.bufferSize = 512_000
 	}
 
 	var err error
@@ -137,7 +144,7 @@ func (i *Initiator) waitForReconnectInterval(reconnectInterval time.Duration) bo
 	return true
 }
 
-func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, dialer proxy.Dialer) {
+func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, dialer proxy.Dialer, bufferSize int) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -193,7 +200,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 			goto reconnect
 		}
 
-		go readLoop(netConn, newParser(bufio.NewReaderSize(netConn, 10*1000*1024*1024)), msgIn)
+		go readLoop(netConn, newParser(bufio.NewReaderSize(netConn, bufferSize)), msgIn)
 		disconnected = make(chan interface{})
 		go func() {
 			writeLoop(netConn, msgOut, session.log)
