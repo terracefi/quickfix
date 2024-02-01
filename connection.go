@@ -18,6 +18,7 @@ package quickfix
 import (
 	"fmt"
 	"io"
+	"net"
 )
 
 func writeLoop(connection io.Writer, messageOut chan []byte, log Log) {
@@ -33,13 +34,13 @@ func writeLoop(connection io.Writer, messageOut chan []byte, log Log) {
 	}
 }
 
-func readLoop(parser *parser, msgIn chan fixIn) {
+func readLoop(netConn net.Conn, parser *parser, msgIn chan fixIn) {
 	defer close(msgIn)
 
 	for {
 		msg, err := parser.ReadMessage()
 		if err != nil {
-			fmt.Printf("Error reading message: %s\n", err.Error())
+			fmt.Printf("Error reading message from conn (%v): %s\n", netConn.LocalAddr().String(), err.Error())
 			return
 		}
 		
