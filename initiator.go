@@ -18,6 +18,7 @@ package quickfix
 import (
 	"bufio"
 	"crypto/tls"
+	"net"
 	"strings"
 	"sync"
 	"time"
@@ -36,6 +37,7 @@ type Initiator struct {
 	stopChan        chan interface{}
 	wg              sync.WaitGroup
 	sessions        map[SessionID]*session
+	localAddr *net.TCPAddr
 	sessionFactory
 }
 
@@ -51,7 +53,7 @@ func (i *Initiator) Start() (err error) {
 		}
 
 		var dialer proxy.Dialer
-		if dialer, err = loadDialerConfig(settings); err != nil {
+		if dialer, err = loadDialerConfig(settings, i.localAddr); err != nil {
 			return
 		}
 
@@ -77,7 +79,7 @@ func (i *Initiator) Stop() {
 }
 
 // NewInitiator creates and initializes a new Initiator.
-func NewInitiator(app Application, storeFactory MessageStoreFactory, appSettings *Settings, logFactory LogFactory) (*Initiator, error) {
+func NewInitiator(app Application, storeFactory MessageStoreFactory, appSettings *Settings, logFactory LogFactory, localAddr *net.TCPAddr) (*Initiator, error) {
 	i := &Initiator{
 		app:             app,
 		storeFactory:    storeFactory,
@@ -86,6 +88,7 @@ func NewInitiator(app Application, storeFactory MessageStoreFactory, appSettings
 		logFactory:      logFactory,
 		sessions:        make(map[SessionID]*session),
 		sessionFactory:  sessionFactory{true},
+		localAddr: 	 localAddr,
 	}
 
 	var err error

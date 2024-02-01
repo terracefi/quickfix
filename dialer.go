@@ -25,8 +25,10 @@ import (
 	"github.com/terracefi/quickfix/config"
 )
 
-func loadDialerConfig(settings *SessionSettings) (dialer proxy.Dialer, err error) {
-	stdDialer := &net.Dialer{}
+func loadDialerConfig(settings *SessionSettings, localAddr *net.TCPAddr) (dialer proxy.Dialer, err error) {
+	stdDialer := &net.Dialer{
+		LocalAddr: localAddr,
+	}
 	if settings.HasSetting(config.SocketTimeout) {
 		timeout, err := settings.DurationSetting(config.SocketTimeout)
 		if err != nil {

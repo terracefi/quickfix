@@ -39,7 +39,7 @@ func (s *DialerTestSuite) SetupTest() {
 }
 
 func (s *DialerTestSuite) TestLoadDialerNoSettings() {
-	dialer, err := loadDialerConfig(s.settings.GlobalSettings())
+	dialer, err := loadDialerConfig(s.settings.GlobalSettings(), nil)
 	s.Require().Nil(err)
 
 	stdDialer, ok := dialer.(*net.Dialer)
@@ -50,7 +50,7 @@ func (s *DialerTestSuite) TestLoadDialerNoSettings() {
 
 func (s *DialerTestSuite) TestLoadDialerWithTimeout() {
 	s.settings.GlobalSettings().Set(config.SocketTimeout, "10s")
-	dialer, err := loadDialerConfig(s.settings.GlobalSettings())
+	dialer, err := loadDialerConfig(s.settings.GlobalSettings(), nil)
 	s.Require().Nil(err)
 
 	stdDialer, ok := dialer.(*net.Dialer)
@@ -61,7 +61,7 @@ func (s *DialerTestSuite) TestLoadDialerWithTimeout() {
 
 func (s *DialerTestSuite) TestLoadDialerInvalidProxy() {
 	s.settings.GlobalSettings().Set(config.ProxyType, "totallyinvalidproxytype")
-	_, err := loadDialerConfig(s.settings.GlobalSettings())
+	_, err := loadDialerConfig(s.settings.GlobalSettings(), nil)
 	s.Require().NotNil(err)
 }
 
@@ -69,7 +69,7 @@ func (s *DialerTestSuite) TestLoadDialerSocksProxy() {
 	s.settings.GlobalSettings().Set(config.ProxyType, "socks")
 	s.settings.GlobalSettings().Set(config.ProxyHost, "localhost")
 	s.settings.GlobalSettings().Set(config.ProxyPort, "31337")
-	dialer, err := loadDialerConfig(s.settings.GlobalSettings())
+	dialer, err := loadDialerConfig(s.settings.GlobalSettings(), nil)
 	s.Require().Nil(err)
 	s.Require().NotNil(dialer)
 
@@ -80,13 +80,13 @@ func (s *DialerTestSuite) TestLoadDialerSocksProxy() {
 func (s *DialerTestSuite) TestLoadDialerSocksProxyInvalidHost() {
 	s.settings.GlobalSettings().Set(config.ProxyType, "socks")
 	s.settings.GlobalSettings().Set(config.ProxyPort, "31337")
-	_, err := loadDialerConfig(s.settings.GlobalSettings())
+	_, err := loadDialerConfig(s.settings.GlobalSettings(), nil)
 	s.Require().NotNil(err)
 }
 
 func (s *DialerTestSuite) TestLoadDialerSocksProxyInvalidPort() {
 	s.settings.GlobalSettings().Set(config.ProxyType, "socks")
 	s.settings.GlobalSettings().Set(config.ProxyHost, "localhost")
-	_, err := loadDialerConfig(s.settings.GlobalSettings())
+	_, err := loadDialerConfig(s.settings.GlobalSettings(), nil)
 	s.Require().NotNil(err)
 }
