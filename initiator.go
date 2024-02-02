@@ -175,7 +175,15 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		if err != nil {
 			session.log.OnEventf("Failed to connect to %s: %v", session.sessionID.String(), err)
 			goto reconnect
-		} else if tlsConfig != nil {
+		} 
+
+						        // Set the size of the operating system's receive buffer associated with the connection.
+								if err := netConn.(*net.TCPConn).SetReadBuffer(bufferSize); err != nil {
+									session.log.OnEventf("Failed to set read buffer size on session %s: %v", session.sessionID.String(), err)
+									goto reconnect
+								}
+								
+		if tlsConfig != nil {
 			// Unless InsecureSkipVerify is true, server name config is required for TLS
 			// to verify the received certificate
 			if !tlsConfig.InsecureSkipVerify && len(tlsConfig.ServerName) == 0 {
@@ -193,12 +201,15 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 			netConn = tlsConn
 		}
 
+
 		msgIn = make(chan fixIn, 1_000_000)
 		msgOut = make(chan []byte)
 		if err := session.connect(msgIn, msgOut); err != nil {
 			session.log.OnEventf("Failed to initiate on session %s: %v", session.sessionID.String(), err)
 			goto reconnect
 		}
+
+
 
 		go readLoop(netConn, newParser(bufio.NewReaderSize(netConn, bufferSize)), msgIn)
 		disconnected = make(chan interface{})
